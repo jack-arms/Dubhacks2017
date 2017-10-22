@@ -546,7 +546,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void checkNearbyMarkers() {
         boolean withinRange = false;
-        for (Marker m : messages.keySet()) {
+        for (Marker m : dbMessages.values()) {
             double threshold = .001;
             double dist = Math.sqrt(Math.pow(lastKnownLoc.latitude - m.getPosition().latitude, 2) + Math.pow(lastKnownLoc.longitude - m.getPosition().longitude, 2));
             if (dist < threshold) {
