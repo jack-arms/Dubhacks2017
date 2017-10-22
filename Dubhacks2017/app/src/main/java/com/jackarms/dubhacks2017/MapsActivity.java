@@ -31,6 +31,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -122,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     String concernUrl = "http://173.250.252.65:1337/concerns";
 
+    String policeReportUrl = "https://data.seattle.gov/resource/y7pv-r3kh.json?$limit=20&$order=date_reported desc";
+
     public final String ACTION_USB_PERMISSION = "com.hariharan.arduinousb.USB_PERMISSION";
     public final String PHONE_NUMBER = "206-661-3732";
 
@@ -170,6 +173,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         messages = new HashMap<Marker, String>();
         dbMessages = new HashMap<>();
         Timer timer = new Timer();
+
+        getPoliceData();
+
 
 
         // Schedule to run after every 3 second(3000 millisecond)
@@ -437,6 +443,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    // Add the request to the RequestQueue.
 //    queue.add(stringRequest);
 
+  public void getPoliceData() {
+
+    JsonArrayRequest jsArrayReq = new JsonArrayRequest
+      (Request.Method.GET, policeReportUrl, null, new Response.Listener<JSONArray>() {
+
+        @Override
+        public void onResponse(JSONArray response) {
+          Log.d("REQUEST", "Response: " + response.toString());
+          try {
+            for (int i = 0; i < response.length(); i++) {
+              JSONObject r = response.getJSONObject(i);
+
+              MarkerOptions mo = new MarkerOptions()
+                .position(new LatLng(r.getDouble("latitude"), r.getDouble("longitude")))
+                .title(r.getString("offense_type"))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+              Marker m = mMap.addMarker(mo);
+              messages.put(m, "Police report, on " + r.getString("date_reported") + " at " + r.getString("hundred_block_location"));
+
+            }
+          } catch (JSONException e) {
+            Log.d("JSON", e.getStackTrace().toString());
+          }
+        }
+      }, new Response.ErrorListener() {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+          Log.d("REQUEST", "Error: " + error.toString());
+        }
+      });
+
+    queue.add(jsArrayReq);
+  }
+
 
   public void getConcerns() {
     JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -450,7 +492,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (int i = 0; i < concerns.length(); i++) {
                     Concern c = Concern.fromJSONObject(concerns.getJSONObject(i));
                     if (!dbMessages.containsKey(c)) {
-                        dbMessages.put(c, mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))));
+                        dbMessages.put(c, mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))));
                     }
                 }
             } catch (JSONException e) {
