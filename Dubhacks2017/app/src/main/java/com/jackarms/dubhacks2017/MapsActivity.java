@@ -57,8 +57,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -491,13 +493,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           Log.d("REQUEST", "Response: " + response.toString());
             try {
                 JSONArray concerns = response.getJSONArray("concerns");
+                Set<Integer> seenCids = new HashSet<>();
                 for (int i = 0; i < concerns.length(); i++) {
                     Concern c = Concern.fromJSONObject(concerns.getJSONObject(i));
+                    seenCids.add(c.cid);
                     if (!dbMessages.containsKey(c)) {
                         Marker newMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
                         messages.put(newMarker, c.reason);
                         dbMessages.put(c, newMarker);
                     }
+                }
+
+                Set<Concern> copy = new HashSet<>(dbMessages.keySet());
+                for (Concern c2 : copy) {
+                  if (!seenCids.contains(c2.cid)) {
+                    Marker m = dbMessages.remove(c2);
+                    m.remove();
+                  }
                 }
             } catch (JSONException e) {
                 Log.d("JSON", e.getStackTrace().toString());
@@ -534,7 +546,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void checkNearbyMarkers() {
         boolean withinRange = false;
-        for (Marker m : messages.keySet()) {
+        for (Marker m : dbMessages.values()) {
             double threshold = .001;
             double dist = Math.sqrt(Math.pow(lastKnownLoc.latitude - m.getPosition().latitude, 2) + Math.pow(lastKnownLoc.longitude - m.getPosition().longitude, 2));
             if (dist < threshold) {
