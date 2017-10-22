@@ -26,6 +26,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,11 +43,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+class Concern {
+  public int cid;
+  public double lat;
+  public double lng;
+  public String reason;
+  public String time;
+  public String concern_type;
+}
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -54,6 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Spinner incidentTypeSpinner;
     private List<Marker> markers;
     private Map<Marker, String> messages;
+
+    String concernUrl = "http://dubhacks2017.azurewebsites.net/concerns";
 
     public final String ACTION_USB_PERMISSION = "com.hariharan.arduinousb.USB_PERMISSION";
     public final String PHONE_NUMBER = "206-661-3732";
@@ -108,6 +127,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     pendingMarker.setTitle(concernType);
                     Marker newIncidentMarker = mMap.addMarker(new MarkerOptions().position(pendingMarker.getPosition()).title(concernType).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
                     messages.put(newIncidentMarker, concernMessage);
+
+                    // post to db
+                    Concern c = new Concern();
+                    c.lat =          (float)newIncidentMarker.getPosition().latitude;
+                    c.lng =         (float) newIncidentMarker.getPosition().longitude;
+                    c.reason = concernMessage;
+                    c.concern_type = concernType;
+                    c.time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+                    postConcern(c);
+
+
                     markers.add(newIncidentMarker);
                     pendingMarker.remove();
                     pendingMarker = null;
@@ -318,5 +348,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+    }
+
+//    // Instantiate the RequestQueue.
+//    RequestQueue queue = Volley.newRequestQueue(this);
+//    String url ="http://www.google.com";
+//
+//    // Request a string response from the provided URL.
+//    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//    new Response.Listener<String>() {
+//    @Override
+//    public void onResponse(String response) {
+//    // Display the first 500 characters of the response string.
+//    mTextView.setText("Response is: "+ response.substring(0,500));
+//    }
+//    }, new Response.ErrorListener() {
+//    @Override
+//    public void onErrorResponse(VolleyError error) {
+//    mTextView.setText("That didn't work!");
+//    }
+//    });
+//    // Add the request to the RequestQueue.
+//    queue.add(stringRequest);
+
+
+  public List<Concern> getConcerns() {
+    JsonObjectRequest jsObjRequest = new JsonObjectRequest
+      (Request.Method.GET, concernUrl, null, new Response.Listener<JSONObject>() {
+
+        @Override
+        public void onResponse(JSONObject response) {
+          Log.d("REQUEST", "Response: " + response.toString());
+        }
+      }, new Response.ErrorListener() {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+          Log.d("REQUEST", "Error: " + error.toString());
+        }
+      });
+    }
+
+    public void postConcern(Concern c) {
+      JsonObjectRequest jsObjRequest = new JsonObjectRequest
+        (Request.Method.POST, concernUrl, null, new Response.Listener<JSONObject>() {
+
+          @Override
+          public void onResponse(JSONObject response) {
+            Log.d("REQUEST", "Response: " + response.toString());
+          }
+        }, new Response.ErrorListener() {
+
+          @Override
+          public void onErrorResponse(VolleyError error) {
+            Log.d("REQUEST", "Error: " + error.toString());
+          }
+        });
     }
 }
