@@ -336,6 +336,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mMap.moveCamera(CameraUpdateFactory.zoomTo(10));
                 }
                 lastKnownLoc = loc;
+
+                checkNearbyMarkers();
             }
         });
 
@@ -347,6 +349,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return true;
             }
         });
+
+
 
     }
 
@@ -405,4 +409,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           }
         });
     }
+    public void checkNearbyMarkers() {
+        boolean withinRange = false;
+        for (Marker m : markers) {
+            double threshold = .001;
+            double dist = Math.sqrt(Math.pow(lastKnownLoc.latitude - m.getPosition().latitude, 2) + Math.pow(lastKnownLoc.longitude - m.getPosition().longitude, 2));
+            if (dist < threshold) {
+                withinRange = true;
+            }
+        }
+        if (withinRange){
+            sendWarningLights(null);
+        }
+        else {
+            stopWarningLights(null);
+        }
+
+    }
+
 }
