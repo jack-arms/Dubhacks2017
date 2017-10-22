@@ -196,20 +196,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String concernMessage = messageEditText.getText().toString();
                     String concernType = incidentTypeSpinner.getSelectedItem().toString();
                     pendingMarker.setTitle(concernType);
-                    Marker newIncidentMarker = mMap.addMarker(new MarkerOptions().position(pendingMarker.getPosition()).title(concernType).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
-                    messages.put(newIncidentMarker, concernMessage);
+                    //Marker newIncidentMarker = mMap.addMarker(new MarkerOptions().position(pendingMarker.getPosition()).title(concernType).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                    //messages.put(newIncidentMarker, concernMessage);
 
                     // post to db
                     Concern c = new Concern();
-                    c.lat =          (float)newIncidentMarker.getPosition().latitude;
-                    c.lng =         (float) newIncidentMarker.getPosition().longitude;
+                    c.lat =         (float) pendingMarker.getPosition().latitude;
+                    c.lng =         (float) pendingMarker.getPosition().longitude;
                     c.reason = concernMessage;
                     c.concern_type = concernType;
                     c.time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
                     postConcern(c);
 
 
-                    markers.add(newIncidentMarker);
+                    //markers.add(newIncidentMarker);
                     pendingMarker.remove();
                     pendingMarker = null;
                 }
@@ -416,7 +416,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
                 marker.showInfoWindow();
-                messageEditText.setText(messages.get(marker));
+                if (messages.containsKey(marker)) {
+                    messageEditText.setText(messages.get(marker));
+                }
                 return true;
             }
         });
@@ -492,7 +494,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (int i = 0; i < concerns.length(); i++) {
                     Concern c = Concern.fromJSONObject(concerns.getJSONObject(i));
                     if (!dbMessages.containsKey(c)) {
-                        dbMessages.put(c, mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))));
+                        Marker newMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                        messages.put(newMarker, c.reason);
+                        dbMessages.put(c, newMarker);
                     }
                 }
             } catch (JSONException e) {
@@ -517,7 +521,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           @Override
           public void onResponse(JSONObject response) {
             Log.d("REQUEST", "Response: " + response.toString());
-              Toast.makeText(context, "Request sent: " + response.toString(), Toast.LENGTH_LONG).show();
+              Toast.makeText(context, "Thank you for your report.", Toast.LENGTH_LONG).show();
           }
         }, new Response.ErrorListener() {
 
