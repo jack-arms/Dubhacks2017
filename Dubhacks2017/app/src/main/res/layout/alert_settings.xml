@@ -3,7 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
   <Button
     android:id="@+id/connect_arduino"
     android:layout_width="153dp"
