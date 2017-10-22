@@ -1,126 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  tools:context="com.jackarms.dubhacks2017.AlertSettings">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-  <Button
-    android:id="@+id/sound_alarm"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:layout_marginEnd="4dp"
-    android:layout_marginTop="8dp"
-    android:onClick="soundAlarm"
-    android:text="Sound alarm"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/logText"
-    app:layout_constraintVertical_bias="1.0" />
-
-  <ToggleButton
-    android:id="@+id/toggle_alarm"
-    android:layout_width="wrap_content"
-    android:layout_height="46dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginStart="44dp"
-    android:layout_marginTop="28dp"
-    android:text="ToggleButton"
-    app:layout_constraintBottom_toTopOf="@+id/logText"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/textView"
-    app:layout_constraintTop_toTopOf="parent" />
-
-  <TextView
-    android:id="@+id/textView"
-    android:layout_width="141dp"
-    android:layout_height="42dp"
-    android:layout_marginStart="40dp"
-    android:layout_marginTop="28dp"
-    android:text="Enable alarm"
-    android:textAlignment="viewStart"
-    android:textSize="24sp"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="Allow alarm" />
-
-  <Button
-    android:id="@+id/stop_alarm"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:layout_marginEnd="8dp"
-    android:onClick="stopAlarm"
-    android:text="Stop Alarm"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/sound_alarm" />
-
-  <Button
-    android:id="@+id/max_volume"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginStart="8dp"
-    android:onClick="setMaxRingtoneVolumne"
-    android:text="Max volume"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/stop_alarm"
-    app:layout_constraintHorizontal_bias="0.727"
-    app:layout_constraintStart_toStartOf="parent" />
-
-  <Button
-    android:id="@+id/send_warn_lights"
-    android:layout_width="114dp"
-    android:layout_height="72dp"
-    android:layout_marginBottom="4dp"
-    android:layout_marginStart="16dp"
-    android:onClick="sendWarningLights"
-    android:text="Send Warning lights"
-    app:layout_constraintBottom_toTopOf="@+id/max_volume"
-    app:layout_constraintStart_toStartOf="parent" />
-
-  <TextView
-    android:id="@+id/logText"
-    android:layout_width="342dp"
-    android:layout_height="293dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:text=""
-    app:layout_constraintBottom_toTopOf="@+id/send_warn_lights"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/textView" />
 
   <Button
     android:id="@+id/connect_arduino"
-    android:layout_width="112dp"
+    android:layout_width="153dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="24dp"
-    android:layout_marginEnd="12dp"
-    android:layout_marginStart="8dp"
-    android:onClick="arduinoSetup"
-    android:text="Connect arduino"
-    app:layout_constraintBottom_toTopOf="@+id/sound_alarm"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/stop_lights" />
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentEnd="true"
+    android:layout_marginBottom="18dp"
+    android:layout_marginEnd="18dp"
+    android:text="Connect arduino" />
+
+  <TextView
+    android:id="@+id/logText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:layout_marginStart="24dp"
+    android:layout_marginTop="94dp" />
+
+  <Button
+    android:id="@+id/send_lights"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/connect_arduino"
+    android:layout_alignEnd="@+id/connect_arduino"
+    android:layout_marginBottom="12dp"
+    android:text="Send warning lights"
+    android:onClick="sendWarningLights"/>
 
   <Button
     android:id="@+id/stop_lights"
-    android:layout_width="110dp"
-    android:layout_height="71dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/send_lights"
+    android:layout_alignEnd="@+id/send_lights"
+    android:layout_marginBottom="13dp"
+    android:layout_marginEnd="14dp"
     android:text="Stop warning lights"
-    android:onClick="stopWarningLights"
-    app:layout_constraintBottom_toTopOf="@+id/stop_alarm"
-    app:layout_constraintStart_toEndOf="@+id/send_warn_lights" />
-
-</android.support.constraint.ConstraintLayout>
+    android:onClick="stopWarningLights"/>
+</RelativeLayout>

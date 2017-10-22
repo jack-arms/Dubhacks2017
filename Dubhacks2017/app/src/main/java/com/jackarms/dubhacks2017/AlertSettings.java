@@ -17,8 +17,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -64,9 +62,9 @@ public class AlertSettings extends AppCompatActivity {
     alarm = RingtoneManager.getRingtone(getApplicationContext(), path);
     alarmEnabled = false;
 
-    ToggleButton alarmSet = (ToggleButton) findViewById(R.id.toggle_alarm);
-    connectArduino = (Button) findViewById(R.id.connect_arduino);
-    logText = (TextView) findViewById(R.id.logText);
+    ToggleButton alarmSet = null; //(ToggleButton) findViewById(R.id.toggle_alarm);
+    connectArduino = null; // (Button) findViewById(R.id.connect_arduino);
+    logText = null; // (TextView) findViewById(R.id.logText);
     logText.setMovementMethod(new ScrollingMovementMethod());
     Log.d("BLAH", "Registered logText?" + Boolean.toString(logText != null));
     alarmSet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
