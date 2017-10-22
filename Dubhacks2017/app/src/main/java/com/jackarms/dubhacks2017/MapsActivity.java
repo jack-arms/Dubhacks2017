@@ -25,11 +25,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,7 +45,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -52,6 +58,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 class Concern {
   public int cid;
@@ -60,6 +68,44 @@ class Concern {
   public String reason;
   public String time;
   public String concern_type;
+
+    JSONObject toJSONObject() {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("lat", lat);
+            o.put("lng", lng);
+            o.put("reason", reason);
+            o.put("time", time);
+            o.put("concern_type", concern_type);
+        } catch (JSONException e) { return null; }
+        return o;
+    }
+
+    static Concern fromJSONObject(JSONObject o) {
+        try {
+            Concern c = new Concern();
+            c.cid = o.getInt("cid");
+            c.lat = o.getDouble("lat");
+            c.lng = o.getDouble("lng");
+            c.reason = o.getString("reason");
+            c.time = o.getString("time");
+            c.concern_type = o.getString("concern_type");
+
+            return c;
+        } catch (JSONException e) {
+            Log.d("JSON", e.getStackTrace().toString());
+            return null;
+        }
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Concern)) return false;
+        return ((Concern)o).cid == this.cid;
+    }
+
+    public int hashCode() {
+        return cid;
+    }
 }
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -72,10 +118,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Marker> markers;
     private Map<Marker, String> messages;
 
-    String concernUrl = "http://dubhacks2017.azurewebsites.net/concerns";
+    private Map<Concern, Marker> dbMessages;
+
+    String concernUrl = "http://173.250.252.65:1337/concerns";
 
     public final String ACTION_USB_PERMISSION = "com.hariharan.arduinousb.USB_PERMISSION";
     public final String PHONE_NUMBER = "206-661-3732";
+
+    class MarkerTask extends TimerTask {
+
+        public void run(){
+            getConcerns();
+        }
+    }
 
     UsbManager usbManager;
     UsbDevice device;
@@ -84,6 +139,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Context context;
     private TextView logText;
     Button connectArduino;
+
+    RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        queue = Volley.newRequestQueue(this);
 
         connectArduino = (Button) findViewById(R.id.connect_arduino);
 //        logText = (TextView) findViewById(R.id.logText);
@@ -110,6 +168,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         markers = new ArrayList<Marker>();
         messages = new HashMap<Marker, String>();
+        dbMessages = new HashMap<>();
+        Timer timer = new Timer();
+
+
+        // Schedule to run after every 3 second(3000 millisecond)
+        timer.scheduleAtFixedRate( new MarkerTask(), 3000, 3000);
+
 
         messageEditText = (EditText) findViewById(R.id.messageEditText);
 
@@ -352,7 +417,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 //    // Instantiate the RequestQueue.
-//    RequestQueue queue = Volley.newRequestQueue(this);
+
 //    String url ="http://www.google.com";
 //
 //    // Request a string response from the provided URL.
@@ -373,13 +438,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    queue.add(stringRequest);
 
 
-  public List<Concern> getConcerns() {
+  public void getConcerns() {
     JsonObjectRequest jsObjRequest = new JsonObjectRequest
       (Request.Method.GET, concernUrl, null, new Response.Listener<JSONObject>() {
 
         @Override
         public void onResponse(JSONObject response) {
           Log.d("REQUEST", "Response: " + response.toString());
+            try {
+                JSONArray concerns = response.getJSONArray("concerns");
+                for (int i = 0; i < concerns.length(); i++) {
+                    Concern c = Concern.fromJSONObject(concerns.getJSONObject(i));
+                    if (!dbMessages.containsKey(c)) {
+                        dbMessages.put(c, mMap.addMarker(new MarkerOptions().position(new LatLng(c.lat, c.lng)).title(c.concern_type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))));
+                    }
+                }
+            } catch (JSONException e) {
+                Log.d("JSON", e.getStackTrace().toString());
+            }
         }
       }, new Response.ErrorListener() {
 
@@ -388,15 +464,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           Log.d("REQUEST", "Error: " + error.toString());
         }
       });
+
+      queue.add(jsObjRequest);
     }
 
     public void postConcern(Concern c) {
       JsonObjectRequest jsObjRequest = new JsonObjectRequest
-        (Request.Method.POST, concernUrl, null, new Response.Listener<JSONObject>() {
+        (Request.Method.POST, concernUrl, c.toJSONObject(), new Response.Listener<JSONObject>() {
 
           @Override
           public void onResponse(JSONObject response) {
             Log.d("REQUEST", "Response: " + response.toString());
+              Toast.makeText(context, "Request sent: " + response.toString(), Toast.LENGTH_LONG).show();
           }
         }, new Response.ErrorListener() {
 
@@ -405,6 +484,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("REQUEST", "Error: " + error.toString());
           }
         });
+        queue.add(jsObjRequest);
     }
     public void checkNearbyMarkers() {
         boolean withinRange = false;
