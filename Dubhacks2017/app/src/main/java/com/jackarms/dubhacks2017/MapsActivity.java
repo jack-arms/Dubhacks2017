@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Map<Concern, Marker> dbMessages;
 
-    String concernUrl = "http://173.250.252.65:1337/concerns";
+    String concernUrl = "http://108.179.184.149:1337/concerns";
 
     String policeReportUrl = "https://data.seattle.gov/resource/y7pv-r3kh.json?$limit=20&$order=date_reported desc";
 
