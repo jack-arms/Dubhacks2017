@@ -125,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     String concernUrl = "http://108.179.184.149:1337/concerns";
 
-    String policeReportUrl = "https://data.seattle.gov/resource/y7pv-r3kh.json?$limit=20&$order=date_reported desc";
+    String policeReportUrl = "https://data.seattle.gov/resource/y7pv-r3kh.json?$limit=20&$order=date_reported%20desc";
 
     public final String ACTION_USB_PERMISSION = "com.hariharan.arduinousb.USB_PERMISSION";
     public final String PHONE_NUMBER = "206-661-3732";
@@ -546,7 +546,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void checkNearbyMarkers() {
         boolean withinRange = false;
-        for (Marker m : markers) {
+        for (Marker m : messages.keySet()) {
             double threshold = .001;
             double dist = Math.sqrt(Math.pow(lastKnownLoc.latitude - m.getPosition().latitude, 2) + Math.pow(lastKnownLoc.longitude - m.getPosition().longitude, 2));
             if (dist < threshold) {
