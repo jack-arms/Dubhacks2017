@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Dubhacks2017</string>
+  <string name="app_name">Dubhacks2017</string>
+  <string name="title_activity_alert_settings">Alert Settings</string>
 </resources>
