@@ -407,7 +407,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (lastKnownLoc.equals(new LatLng(0, 0))) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
                     mMap.moveCamera(CameraUpdateFactory.zoomTo(10));
-                }
+                 }
                 lastKnownLoc = loc;
 
                 checkNearbyMarkers();
